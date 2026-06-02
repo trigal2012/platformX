@@ -85,5 +85,73 @@
         "share_text": "I balanced the Carbon Footprint Challenge!"
       }
     ]
+  },
+    {
+    "id": "game-5-roi-college",
+    "title": "The Price of the Portal",
+    "concept": "Higher Ed ROI & Debt Simulation",
+    "desc": "Navigate the fine line between pursuing your passion and taking on life-altering student debt. Can you balance your joy with your future checkbook?",
+    "contribution": "Data Engine: Federal Student Aid Bureau & Bureau of Labor Statistics (BLS) 2026 Forecasts",
+    "sponsor": {
+      "name": "Financial Literacy Foundation",
+      "message": "Empowering students to build sustainable wealth pathways."
+    },
+    "screens": [
+      {
+        "type": "onboarding",
+        "heading": "The $100,000 Crossroads",
+        "body": "You are 18 years old. Society tells you to go to the best college possible, no matter the cost. You have 100 'Joy Points' representing your mental health and alignment with your passion. Let's see how your choices look at age 30.",
+        "button_text": "Choose a Path"
+      },
+      {
+        "type": "interaction_page",
+        "prompt": "Phase 1: Select your Academic Major and Institutional Path. Notice the cost vs. your intrinsic passion profile:",
+        "options": [
+          {
+            "id": "stem_public",
+            "text": "STEM Degree (In-State Public Uni) | Cost: $25K/yr | Passion: Moderate (+10 Joy)",
+            "metric_shift": [25000, 75000, 10], 
+            "multiplier": 1.0
+          },
+          {
+            "id": "arts_private",
+            "text": "Fine Arts Degree (Elite Private Uni) | Cost: $65K/yr | Passion: Extremely High (+50 Joy)",
+            "metric_shift": [65000, 42000, 50],
+            "multiplier": 0.6
+          },
+          {
+            "id": "humanities_out",
+            "text": "Humanities Degree (Out-of-State Public) | Cost: $45K/yr | Passion: High (+30 Joy)",
+            "metric_shift": [45000, 52000, 30],
+            "multiplier": 0.8
+          }
+        ]
+      },
+      {
+        "type": "slider_adjustment",
+        "prompt": "Phase 2: Funding Mix. Slide to determine how much of your annual tuition is covered by standard Student Loans. The remainder is covered by working part-time or family help.",
+        "slider": {
+          "id": "loan_percentage",
+          "label": "Percentage of Costs Funded via Student Loans",
+          "initial": 50,
+          "min": 10,
+          "max": 100
+        }
+      },
+      {
+        "type": "visual_reveal_graph",
+        "heading": "The Age 30 Financial Horizon",
+        "body": "The bars below track your net take-home pay over your first six working years after deducting taxes, rent, and your mandatory monthly student loan payments:"
+      },
+      {
+        "type": "ultimate_reveal",
+        "heading": "Simulation Outcome Profile",
+        "subscription_hook": {
+          "prompt": "Want a free, real-world student loan repayment calculator tool sent to your inbox?",
+          "button_text": "Join the Young Wealth Newsletter"
+        }
+      }
+    ]
   }
+
 ]
