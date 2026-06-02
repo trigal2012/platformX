@@ -44,32 +44,48 @@
     // Initialize application using routing query strings
     const gameId = new URLSearchParams(window.location.search).get('id') || 'game-1-sliders';
     
-// The './' forces the browser to look inside the /platformX/ subdirectory
+console.log("Initializing payload acquisition...");
+
 fetch('./games.json?v=' + Date.now())
-  .then(response => {
-    // Defensive coding: Check if the server actually returned the file
-    if (!response.ok) {
-      throw new Error(`Network response was not ok: ${response.status}`);
+  .then(res => {
+    console.log("Network response header received. Status:", res.status);
+    if (!res.ok) {
+      throw new Error(`Server returned HTTP Status ${res.status} when reading games.json`);
     }
-    return response.json();
+    return res.text(); // Read raw text first to inspect structural anomalies
   })
-  .then(data => {
-    activeGameConfig = data.find(g => g.id === gameId);
-    if (!activeGameConfig) {
-      document.getElementById('nav-game-title').innerText = "Module Not Found";
-      return;
+  .then(rawText => {
+    try {
+      const data = JSON.parse(rawText);
+      console.log("JSON parsing execution clear:", data);
+      
+      activeGameConfig = data.find(g => g.id === gameId);
+      if (!activeGameConfig) {
+        throw new Error(`Data verified, but no matching configuration ID found for: "${gameId}"`);
+      }
+      
+      renderMetadataFrame();
+      renderActiveScreen();
+    } catch (jsonError) {
+      // Catch syntax errors specifically inside games.json
+      throw new Error(`Malformed JSON structure inside games.json. Details: ${jsonError.message}\n\nRaw Text Preview: ${rawText.substring(0, 100)}`);
     }
-    renderMetadataFrame();
-    renderActiveScreen();
   })
-  .catch(error => {
-    console.error("Failed to load game configuration:", error);
-    // Display the error directly on the screen since we are testing on mobile
-    document.getElementById('game-stage').innerHTML = `
-      <div class="text-center text-rose-400 p-4 bg-rose-950/30 rounded-xl border border-rose-800">
-        <p class="font-bold">Data Load Error</p>
-        <p class="text-xs mt-1 text-slate-400">${error.message}</p>
-      </div>`;
+  .catch(err => {
+    // Bubble network errors up to our global screen handler
+    console.error("Catch operational pipeline block:", err);
+    
+    const stage = document.getElementById('game-stage');
+    if (stage) {
+      stage.innerHTML = `
+        <div class="text-center p-5 bg-rose-950/40 border border-rose-800 rounded-xl text-rose-300 space-y-3">
+          <p class="font-bold text-sm">Engine Network Error</p>
+          <div class="text-xs text-left text-slate-300 font-mono bg-slate-900/80 p-3 rounded border border-slate-700/50 max-h-48 overflow-y-auto whitespace-pre-wrap">${err.message}</div>
+          <button onclick="window.location.reload(true)" class="w-full bg-rose-800 hover:bg-rose-700 py-2 rounded-lg font-bold text-xs text-white transition">Force Network Reload</button>
+        </div>`;
+    } else {
+      alert("Pipeline failure outside active DOM state: " + err.message);
+    }
   });
 
 
