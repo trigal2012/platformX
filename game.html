@@ -44,7 +44,7 @@
     // Initialize application using routing query strings
     const gameId = new URLSearchParams(window.location.search).get('id') || 'game-1-sliders';
     
-    fetch('games.json')
+    fetch('./games.json')
       .then(res => res.json())
       .then(data => {
         activeGameConfig = data.find(g => g.id === gameId);
