@@ -180,23 +180,38 @@ fetch('./games.json?v=' + Date.now())
           });
           break;
 
-        case 'visual_reveal_graph':
-          stage.innerHTML = `
-            <div class="space-y-4 text-center">
-              <h3 class="text-lg font-bold text-white">${screen.heading}</h3>
-              <p class="text-xs text-slate-350">${screen.body}</p>
-              
-              <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 space-y-3">
-                <div id="bar-graph-container" class="flex justify-around items-end h-28 pt-2"></div>
-                <div class="flex justify-around text-[9px] text-slate-400 uppercase font-mono tracking-wider font-bold">
-                  <span>Yr 2</span><span>Yr 4</span><span>Yr 6</span><span>Yr 8</span><span>Yr 10</span>
-                </div>
-              </div>
+// REPLACE THAT ENTIRE CASE BLOCK WITH THIS CLEAN RUNTIME:
+case 'visual_reveal_graph':
+  stage.innerHTML = `
+    <div class="space-y-4 text-center">
+      <h3 class="text-lg font-bold text-white">${screen.heading}</h3>
+      <p class="text-xs text-slate-350">${screen.body}</p>
+      <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 space-y-3">
+        <div id="bar-graph-container" class="flex justify-around items-end h-28 pt-2"></div>
+        <div class="flex justify-around text-[9px] text-slate-400 uppercase font-mono tracking-wider font-bold">
+          <span>Yr 2</span><span>Yr 4</span><span>Yr 6</span><span>Yr 8</span><span>Yr 10</span>
+        </div>
+      </div>
+      <button onclick="resetEngineModuleLoop()" class="w-full bg-slate-700 hover:bg-slate-600 py-2.5 rounded-xl font-bold text-xs transition">Reset Simulation</button>
+    </div>`;
+  
+  const gContainer = document.getElementById('bar-graph-container');
+  const points = sessionState.choiceMetrics.length ? sessionState.choiceMetrics : [10, 20, 30, 40, 50];
+  
+  points.forEach(val => {
+    const barWrapper = document.createElement('div');
+    barWrapper.className = "w-6 bg-slate-750 rounded-t relative flex flex-col justify-end items-center";
+    barWrapper.style.height = Math.max(5, Math.min(100, val)) + "%";
+    
+    // Using clean backticks (``) removes string concatenation syntax errors entirely
+    barWrapper.innerHTML = `
+      <div class="w-full bg-indigo-500 rounded-t" style="height:100%"></div>
+      <span class="absolute -top-5 text-[9px] font-mono font-bold text-indigo-400">${val}%</span>
+    `;
+    gContainer.appendChild(barWrapper);
+  });
+  break;
 
-              <button onclick="resetEngineModuleLoop()" class="w-full bg-slate-700 hover:bg-slate-600 py-2.5 rounded-xl font-bold text-xs transition">
-                Reset Simulation Loop
-              </button>
-            </div>`;
           
           const gContainer = document.getElementById('bar-graph-container');
           const points = sessionState.choiceMetrics.length ? sessionState.choiceMetrics : [10, 20, 30, 40, 50];
