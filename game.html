@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Global Mobile Debugger Interceptor -->
+  <script>
+    window.onerror = function(message, source, lineno, colno, error) {
+      const errorMsg = `🛑 ENGINE UNCAUGHT ERROR:\nMsg: ${message}\nLine: ${lineno}:${colno}\nFile: ${source ? source.split('/').pop() : 'inline script'}`;
+      alert(errorMsg);
+      return false;
+    };
+    window.addEventListener('unhandledrejection', function(event) {
+      alert(`⚠️ ENGINE PROMISE REJECTION:\n${event.reason}`);
+    });
+  </script>
+
+  <title>EduGames Orchestration Engine</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between p-4">
+
+  <!-- Main Application Card Window -->
+  <div class="max-w-md mx-auto w-full bg-slate-800 rounded-2xl shadow-xl border border-slate-700 overflow-hidden flex flex-col my-auto">
+    
+    <!-- Top Contextual Navigation Header -->
+    <div class="bg-indigo-600 p-4 flex justify-between items-center text-white shadow-sm">
+      <a href="./index.html" class="text-xs font-semibold opacity-80 hover:opacity-100">&larr; Arcade</a>
+      <span id="nav-game-title" class="text-sm font-bold tracking-tight text-center truncate px-2">Loading Module...</span>
+      <span id="nav-step-tracker" class="bg-indigo-800 text-[10px] px-2 py-0.5 rounded font-mono font-bold whitespace-nowrap">Page 1/1</span>
+    </div>
+
+    <!-- Active Structural Screen Insertion Stage -->
+    <div id="game-stage" class="p-6 flex-grow min-h-[420px] flex flex-col justify-center space-y-6">
+      <div id="fallback-status" class="text-center text-slate-400 text-sm animate-pulse">
+        Initializing decoupled configuration matrix...
+      </div>
+    </div>
+
+    <!-- Dynamic Context Footer Tracking -->
+    <div class="bg-slate-850 px-5 py-3 border-t border-slate-750 text-[10px] text-slate-400 flex flex-col space-y-2">
+      <div class="flex justify-between font-medium">
+        <span id="footer-source">Data Source Verification</span>
+        <span id="footer-sponsor-tag" class="text-amber-400 font-bold uppercase tracking-wider"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Runtime Logic Orchestration Engine -->
+  <script>
+    // System Global Variables
+    let activeGameConfig = null;
+    let currentScreenPointer = 0;
+    
+    // Core Engine State Matrix
+    let sessionState = { 
+      selectedChoiceId: null, 
+      choiceMetrics: [], 
+      sliderValues: {}, 
+      loanPercentage: 80,
+      customInputs: {
+        tuition: 0,
+        living: 0,
+        grants: 0
+      },
+      salary: 45000,
+      joyPoints: 100
+    };
+
+    // Clean extraction of the ID parameter from URL
+    const rawParams = new URLSearchParams(window.location.search);
+    let gameId = rawParams.get('id');
+    if (gameId) {
+      gameId = gameId.trim().toLowerCase();
+    } else {
+      gameId = 'game-1-sliders'; // Default fallback
+    }
+
+    // Dynamic data fetch loop
+    fetch('./games.json?v=' + Date.now())
+      .then(function(res) {
+        if (!res.ok) throw new Error("Server communication alert: HTTP " + res.status);
+        return res.json();
+      })
+      .then(function(data) {
+        activeGameConfig = data.find(function(g) { 
+          return g.id.trim().toLowerCase() === gameId; 
+        });
+        
+        if (!activeGameConfig) {
+          let availableIds = data.map(function(item) { return item.id; }).join(', ');
+          throw new Error("ID Mismatch! Target URL parameter path '" + gameId + "' map not found inside configuration array.");
+        }
+        
+        renderMetadataFrame();
+        renderActiveScreen();
+      })
+      .catch(function(err) {
+        document.getElementById('game-stage').innerHTML = [
+          '<div class="text-center p-4 bg-rose-950/40 border border-rose-800 rounded-xl text-rose-300">',
+            '<p class="font-bold text-sm">Pipeline Rendering Interrupted</p>',
+            '<p class="text-xs text-slate-400 font-mono mt-2 bg-slate-900 p-2 rounded break-words">' + err.message + '</p>',
+            '<a href="./index.html" class="inline-block mt-4 bg-rose-900 hover:bg-rose-800 px-4 py-2 rounded-xl text-xs font-bold text-white transition">&larr; Return to Arcade</a>',
+          '</div>'
+        ].join('');
+      });
+
+    function renderMetadataFrame() {
+      document.getElementById('nav-game-title').innerText = activeGameConfig.title;
+      document.getElementById('footer-source').innerText = activeGameConfig.contribution || "Verified Data Pipeline";
+      if (activeGameConfig.sponsor) {
+        document.getElementById('footer-sponsor-tag').innerText = activeGameConfig.sponsor.name;
+      }
+    }
+
+    function renderActiveScreen() {
+      const stage = document.getElementById('game-stage');
+      const screen = activeGameConfig.screens[currentScreenPointer];
+      document.getElementById('nav-step-tracker').innerText = "Page " + (currentScreenPointer + 1) + "/" + activeGameConfig.screens.length;
+      stage.innerHTML = ''; 
+
+      if (screen.type === 'onboarding') {
+        stage.innerHTML = [
+          '<div class="text-center space-y-4 animate-fadeIn">',
+            '<h2 class="text-xl font-extrabold text-white">' + (screen.heading || 'Get Ready') + '</h2>',
+            '<p class="text-xs text-slate-300 leading-relaxed text-left bg-slate-900/40 p-4 rounded-xl border border-slate-750">' + (screen.body || '') + '</p>',
+            '<button onclick="advanceScreenNext()" class="w-full bg-indigo-600 hover:bg-indigo-500 py-3 rounded-xl font-bold transition active:scale-95 shadow-lg">' + (screen.button_text || 'Continue') + ' &rarr;</button>',
+          '</div>'
+        ].join('');
+      } 
+      else if (screen.type === 'interaction_page') {
+        stage.innerHTML = [
+          '<div class="space-y-4">',
+            '<p class="text-xs font-semibold text-slate-300 leading-relaxed">' + screen.prompt + '</p>',
+            '<div id="options-box" class="space-y-2.5"></div>',
+            '<button onclick="verifyChoiceSubmission()" class="w-full bg-indigo-600 hover:bg-indigo-500 py-3 rounded-xl font-bold transition active:scale-95">Lock Configuration Selection &rarr;</button>',
+          '</div>'
+        ].join('');
+        
+        const oBox = document.getElementById('options-box');
+        screen.options.forEach(function(opt) {
+          const btn = document.createElement('button');
+          btn.className = "w-full text-left p-3.5 rounded-xl border text-xs font-medium transition flex flex-col space-y-1 " + (sessionState.selectedChoiceId === opt.id ? "border-2 border-indigo-500 bg-indigo-950/40 text-indigo-200" : "border-slate-700 bg-slate-750 hover:bg-slate-700 text-slate-300");
+          btn.innerText = opt.text;
+          btn.addEventListener('click', function() {
+            sessionState.selectedChoiceId = opt.id;
+            sessionState.salary = opt.metric_shift[0];
+            sessionState.joyPoints = opt.metric_shift[1];
+            renderActiveScreen();
+          });
+          oBox.appendChild(btn);
+        });
+      } 
+      else if (screen.type === 'numeric_input_matrix') {
+        stage.innerHTML = [
+          '<div class="space-y-4">',
+            '<p class="text-xs font-semibold text-slate-300">' + screen.prompt + '</p>',
+            '<div id="input-fields-bucket" class="space-y-3"></div>',
+            '<button onclick="processNumericMatrixSave()" class="w-full bg-indigo-600 hover:bg-indigo-500 py-3 rounded-xl font-bold transition active:scale-95 shadow-md">Calculate Net Deficit &rarr;</button>',
+          '</div>'
+        ].join('');
+
+        const bucket = document.getElementById('input-fields-bucket');
+        screen.inputs.forEach(function(input) {
+          const wrap = document.createElement('div');
+          wrap.className = "flex flex-col space-y-1 bg-slate-750 p-3 rounded-xl border border-slate-700";
+          
+          // Pull existing value if user back-tracks
+          const currentVal = sessionState.customInputs[input.id] || "";
+          
+          wrap.innerHTML = [
+            '<label class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">' + input.label + '</label>',
+            '<input type="number" id="field-' + input.id + '" value="' + currentVal + '" placeholder="' + input.placeholder + '" class="p-2.5 bg-slate-950 border border-slate-700 rounded-lg text-sm text-indigo-300 font-mono focus:border-indigo-500 outline-none">'
+          ].join('');
+          bucket.appendChild(wrap);
+        });
+      }
+      else if (screen.type === 'slider_adjustment') {
+        stage.innerHTML = [
+          '<div class="space-y-4">',
+            '<p class="text-xs font-semibold text-slate-300 leading-relaxed">' + screen.prompt + '</p>',
+            '<div class="bg-slate-750 p-4 rounded-xl border border-slate-700 space-y-3">',
+              '<div class="flex justify-between text-xs font-bold">',
+                '<span>' + screen.slider.label + '</span>',
+                '<span id="slider-percentage-lbl" class="text-amber-400 font-mono">' + sessionState.loanPercentage + '%</span>',
+              '</div>',
+              '<input type="range" min="' + screen.slider.min + '" max="' + screen.slider.max + '" value="' + sessionState.loanPercentage + '" class="w-full h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-amber-500" id="live-engine-slider">',
+              '<div id="slider-context-descriptor" class="text-[11px] text-slate-400 font-medium text-center pt-1"></div>',
+            '</div>',
+            '<button onclick="advanceScreenNext()" class="w-full bg-indigo-600 hover:bg-indigo-500 py-3 rounded-xl font-bold transition active:scale-95">Compile Final Financial Projection &rarr;</button>',
+          '</div>'
+        ].join('');
+        
+        const sliderInput = document.getElementById('live-engine-slider');
+        sliderInput.addEventListener('input', function(e) {
+          sessionState.loanPercentage = parseInt(e.target.value);
+          document.getElementById('slider-percentage-lbl').innerText = e.target.value + "%";
+          updateSliderLiveContext();
+        });
+        updateSliderLiveContext();
+      } 
+      else if (screen.type === 'single_page_dashboard') {
+        stage.innerHTML = [
+          '<div class="space-y-4">',
+            '<p class="text-xs text-slate-300 leading-relaxed">' + screen.prompt + '</p>',
+            '<div id="sliders-box" class="space-y-3"></div>',
+            '<div id="sum-tracker" class="p-3 rounded-xl text-center text-xs font-bold bg-slate-900 border border-slate-700"></div>',
+            '<button onclick="verifySumTargetGame()" class="w-full bg-indigo-600 hover:bg-indigo-500 py-3 rounded-xl font-bold transition">Submit Optimization Matrix</button>',
+          '</div>'
+        ].join('');
+        
+        const sBox = document.getElementById('sliders-box');
+        screen.controls.forEach(function(ctrl) {
+          if (!sessionState.sliderValues[ctrl.id]) {
+            sessionState.sliderValues[ctrl.id] = ctrl.initial;
+          }
+          const wrap = document.createElement('div');
+          wrap.className = "space-y-1 bg-slate-750 p-2.5 rounded-lg border border-slate-700";
+          wrap.innerHTML = [
+            '<div class="flex justify-between text-xs font-semibold">',
+              '<span>' + ctrl.label + '</span>',
+              '<span id="lbl-' + ctrl.id + '" class="text-indigo-400 font-mono font-bold">' + sessionState.sliderValues[ctrl.id] + ' MW</span>',
+            '</div>',
+            '<input type="range" min="' + ctrl.min + '" max="' + ctrl.max + '" value="' + sessionState.sliderValues[ctrl.id] + '" class="w-full h-1.5 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-indigo-500 single-game-slider" data-id="' + ctrl.id + '">'
+          ].join('');
+          
+          wrap.querySelector('input').addEventListener('input', function(e) {
+            sessionState.sliderValues[ctrl.id] = parseInt(e.target.value);
+            document.getElementById('lbl-' + ctrl.id).innerText = e.target.value + " MW";
+            evaluateLiveSumTracker();
+          });
+          sBox.appendChild(wrap);
+        });
+        evaluateLiveSumTracker();
+      } 
+      else if (screen.type === 'ultimate_reveal') {
+        if (activeGameConfig.id === 'game-5-roi-college') {
+          calculateAndRenderCollegeOutcome(stage, screen);
+        } else {
+          stage.innerHTML = [
+            '<div class="text-center space-y-4">',
+              '<h2 class="text-xl font-black text-emerald-400">' + screen.heading + '</h2>',
+              '<button onclick="resetEngineModuleLoop()" class="w-full bg-slate-700 hover:bg-slate-600 py-2.5 rounded-xl text-xs font-bold transition">Restart Module</button>',
+            '</div>'
+          ].join('');
+        }
+      }
+    }
+
+    function processNumericMatrixSave() {
+      const tuitionInput = document.getElementById('field-tuition');
+      const livingInput = document.getElementById('field-living');
+      const grantsInput = document.getElementById('field-grants');
+
+      if (!tuitionInput || !livingInput || !grantsInput) return advanceScreenNext();
+
+      const tuition = Math.max(0, parseInt(tuitionInput.value) || 0);
+      const living = Math.max(0, parseInt(livingInput.value) || 0);
+      const grants = Math.max(0, parseInt(grantsInput.value) || 0);
+
+      if (tuition === 0 && living === 0) {
+        return alert("Validation Alert: Please enter your estimated annual tuition or housing metrics to simulate real outcomes.");
+      }
+
+      sessionState.customInputs.tuition = tuition;
+      sessionState.customInputs.living = living;
+      sessionState.customInputs.grants = grants;
+
+      advanceScreenNext();
+    }
+
+    function updateSliderLiveContext() {
+      const desc = document.getElementById('slider-context-descriptor');
+      if (!desc) return;
+      
+      const annualCost = sessionState.customInputs.tuition + sessionState.customInputs.living;
+      const netAnnualGap = Math.max(0, annualCost - sessionState.customInputs.grants);
+      const totalFourYearGap = netAnnualGap * 4;
+      
+      const borrowedAmount = Math.round(totalFourYearGap * (sessionState.loanPercentage / 100));
+      desc.innerHTML = `Funding Choice: You will borrow <span class="text-amber-400 font-bold">$${borrowedAmount.toLocaleString()}</span> total across 4 years. The remaining balance must be paid out-of-pocket.`;
+    }
+
+    function calculateAndRenderCollegeOutcome(stage, screen) {
+      // 1. Calculate base cumulative balance numbers
+      const annualCost = sessionState.customInputs.tuition + sessionState.customInputs.living;
+      const netAnnualGap = Math.max(0, annualCost - sessionState.customInputs.grants);
+      const principalBorrowed = Math.round(netAnnualGap * 4 * (sessionState.loanPercentage / 100));
+      
+      // 2. Perform 10-year compounding standard student loan math (fixed 6.5% interest rate)
+      const interestRate = 0.065;
+      const loanYears = 10;
+      const monthlyRate = interestRate / 12;
+      const totalPaymentsCount = loanYears * 12;
+      
+      let monthlyPayment = 0;
+      if (principalBorrowed > 0) {
+        monthlyPayment = (principalBorrowed * monthlyRate * Math.pow(1 + monthlyRate, totalPaymentsCount)) / (Math.pow(1 + monthlyRate, totalPaymentsCount) - 1);
+      }
+      
+      const totalRepaidSum = monthlyPayment * totalPaymentsCount;
+      const totalInterestPaid = Math.max(0, totalRepaidSum - principalBorrowed);
+      
+      // 3. Real-World Net Take Home Salary Calculations
+      const monthlyGrossSalary = sessionState.salary / 12;
+      const taxDeduction = monthlyGrossSalary * 0.18; // Estimated standard tax bracket
+      const estimatedRentFood = 2100; // Baseline cost of independent survival
+      const netDiscretionaryLeftover = Math.round(monthlyGrossSalary - taxDeduction - estimatedRentFood - monthlyPayment);
+      
+      // 4. Evaluate Financial Stress Severity Index
+      let riskStatus = "Healthy Baseline Matrix";
+      let riskColor = "text-emerald-400";
+      if (netDiscretionaryLeftover < 300) {
+        riskStatus = "High Financial Burnout Hazard";
+        riskColor = "text-rose-400";
+      } else if (netDiscretionaryLeftover < 800) {
+        riskStatus = "Moderate Budget Strain";
+        riskColor = "text-amber-400";
+      }
+
+      stage.innerHTML = [
+        '<div class="space-y-4 animate-fadeIn text-xs">',
+          '<h2 class="text-lg font-black text-indigo-400 text-center uppercase tracking-wide">' + screen.heading + '</h2>',
+          
+          '<div class="bg-slate-900 p-3.5 rounded-xl border border-slate-750 space-y-2">',
+            '<div class="flex justify-between font-mono"><span>Total Sum Borrowed:</span><span class="font-bold text-white">$', principalBorrowed.toLocaleString(), '</span></div>',
+            '<div class="flex justify-between font-mono text-rose-300"><span>10-Yr Compounding Interest:</span><span>+$', Math.round(totalInterestPaid).toLocaleString(), '</span></div>',
+            '<div class="border-t border-slate-800 my-1 pt-1 flex justify-between text-sm font-bold text-amber-400 font-mono"><span>True Price Tag:</span><span>$', Math.round(totalRepaidSum).toLocaleString(), '</span></div>',
+          '</div>',
+
+          '<h3 class="font-bold text-[11px] uppercase tracking-wider text-slate-400">Your Age-30 Monthly Paycheck Breakdown:</h3>',
+          '<div class="bg-slate-950 p-3.5 rounded-xl border border-slate-850 space-y-1.5 font-mono">',
+            '<div class="flex justify-between"><span>Gross Monthly Pay:</span><span class="text-emerald-400">+$', Math.round(monthlyGrossSalary).toLocaleString(), '</span></div>',
+            '<div class="flex justify-between text-slate-500"><span>Estimated Income Taxes:</span><span>-$', Math.round(taxDeduction).toLocaleString(), '</span></div>',
+            '<div class="flex justify-between text-slate-500"><span>Baseline Rent & Food:</span><span>-$', estimatedRentFood.toLocaleString(), '</span></div>',
+            '<div class="flex justify-between text-amber-400 font-bold"><span>Mandatory Student Loan bill:</span><span>-$', Math.round(monthlyPayment).toLocaleString(), '/mo</span></div>',
+            '<div class="border-t border-slate-800 my-1 pt-1 flex justify-between text-sm font-bold ' + riskColor + '"><span>Leftover Flexible Cash:</span><span>$', netDiscretionaryLeftover.toLocaleString(), '</span></div>',
+          '</div>',
+
+          '<div class="p-3 bg-slate-900/60 rounded-lg border border-slate-750">',
+            '<div class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Simulation Status Metric:</div>',
+            '<div class="text-sm font-black mt-0.5 ' + riskColor + '">' + riskStatus + '</div>',
+            '<p class="text-[11px] text-slate-400 mt-1 leading-normal">Your selection strategy path generated an operational Passion Profile rating of <span class="text-indigo-400 font-bold">' + sessionState.joyPoints + ' Joy Points</span>.</p>',
+          '</div>',
+
+          '<div class="bg-slate-900 p-4 rounded-xl border border-dashed border-indigo-900 text-center space-y-2">',
+            '<p class="text-[11px] text-slate-300 font-medium">' + screen.subscription_hook.prompt + '</p>',
+            '<button onclick="alert(\'📬 Subscription integrated to educational outbound stream!\')" class="w-full bg-indigo-600 hover:bg-indigo-500 py-2 rounded-lg font-bold text-white transition text-xs shadow">' + screen.subscription_hook.button_text + '</button>',
+          '</div>',
+
+          '<button onclick="resetEngineModuleLoop()" class="w-full bg-slate-700 hover:bg-slate-600 py-2.5 rounded-xl text-xs font-bold transition">Run Another Comparison Track</button>',
+        '</div>'
+      ].join('');
+    }
+
+    function evaluateLiveSumTracker() {
+      const display = document.getElementById('sum-tracker');
+      let total = 0;
+      document.querySelectorAll('.single-game-slider').forEach(function(input) { total += parseInt(input.value); });
+      display.innerText = "Total Tracked Output: " + total + " MW / 100 MW";
+      display.className = total === 100 ? "p-3 rounded-xl text-center text-xs font-bold bg-emerald-950/40 border border-emerald-700 text-emerald-300" : "p-3 rounded-xl text-center text-xs font-bold bg-amber-950/40 border border-amber-700 text-amber-300";
+    }
+
+    function verifySumTargetGame() {
+      let total = 0;
+      document.querySelectorAll('.single-game-slider').forEach(function(input) { total += parseInt(input.value); });
+      if (total !== 100) {
+        return alert("Configuration framework optimization error: Demand metrics must hit exactly 100 MW. Currently tracked at " + total + " MW.");
+      }
+      alert("🎉 Output balance configuration completely verified!");
+      resetEngineModuleLoop();
+    }
+
+    function verifyChoiceSubmission() {
+      if (!sessionState.selectedChoiceId) {
+        return alert("Execution blocked: Please select an architecture strategy path node before continuing.");
+      }
+      advanceScreenNext();
+    }
+
+    function advanceScreenNext() {
+      if (currentScreenPointer < activeGameConfig.screens.length - 1) {
+        currentScreenPointer++;
+        renderActiveScreen();
+      }
+    }
+
+    function resetEngineModuleLoop() {
+      sessionState = { 
+        selectedChoiceId: null, 
+        choiceMetrics: [], 
+        sliderValues: {}, 
+        loanPercentage: 80,
+        customInputs: { tuition: 0, living: 0, grants: 0 },
+        salary: 45000,
+        joyPoints: 100
+      };
+      currentScreenPointer = 0;
+      renderActiveScreen();
+    }
+  </script>
+</body>
+</html>
