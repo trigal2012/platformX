@@ -60,7 +60,7 @@
 
   <script>
     // Fetch game metadata from JSON file database
-    fetch('./games.json?v'=Date.now())
+    fetch('./games.json')
       .then(res => res.json())
       .then(games => {
         const listContainer = document.getElementById('game-list');
