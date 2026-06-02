@@ -1,4 +1,3 @@
-
 [
   {
     "id": "economic-pie",
@@ -12,19 +11,30 @@
       {"id": "social", "name": "Social Safety Nets", "initial": 40, "min": 0, "max": 100}
     ],
     "success_text": "Success! You maintained baseline security while investing heavily in future human capital. Long-term GDP projections look strong.",
-    "fail_text": "Failure. Your allocation triggered civic unrest due to social cuts, or underfunded research completely tanked innovation."
+    "fail_text": "Failure. Your allocation triggered civic unrest due to social cuts, or underfunded research completely tanked innovation.",
+    "contribution": "Submitted by Prof. Aris (Stanford Econ)",
+    "sponsor": {
+      "name": "Acme Micro-Finance",
+      "message": "Empowering local economies through micro-lending solutions worldwide."
+    }
   },
   {
-    "id": "interest-rates",
-    "title": "Cool Down Inflation",
-    "concept": "Monetary Policy",
-    "prompt": "Inflation is raging at 8.5%. Adjust the central bank's benchmark interest rate to bring inflation down to the 2% target without triggering a massive recession.",
-    "mechanic": "target_range",
-    "sliders": [
-      {"id": "rate", "name": "Federal Funds Rate (%)", "initial": 1.5, "min": 0, "max": 15}
+    "id": "tariff-war",
+    "title": "The Global Trade Dilemma",
+    "concept": "Tariffs & Protectionism",
+    "prompt": "Domestic manufacturing is declining, but implementing high broad tariffs will trigger retaliatory measures from trading partners. Choose the optimal policy action:",
+    "mechanic": "multiple_choice",
+    "choices": [
+      {"id": "a", "text": "Enact targeted subsidies for domestic R&D instead of aggressive border tariffs.", "is_correct": true},
+      {"id": "b", "text": "Impose a flat 25% tariff on all imported goods across the board.", "is_correct": false},
+      {"id": "c", "text": "Completely deregulate all environmental and labor standards to cut manufacturing costs.", "is_correct": false}
     ],
-    "success_text": "Perfect! Raising the interest rate to between 5.5% and 7.0% cooled down consumer borrowing just enough to tame inflation without massive layoffs.",
-    "fail_text": "Unsuccessful. Keeping rates too low allowed runaway hyperinflation to destroy savings. Moving them too high instantly triggered a severe economic depression."
+    "success_text": "Correct decision! Subsidies boosted domestic efficiency and preserved vital international trade agreements without triggering a consumer price spike.",
+    "fail_text": "Incorrect strategy. Aggressive broad tariffs triggered a devastating retaliatory trade war, doubling consumer electronics prices and hurting agriculture exports.",
+    "contribution": "Crowdsourced via EduCommunity Workspace",
+    "sponsor": {
+      "name": "Global Trade Logistics Corp",
+      "message": "Navigating modern supply chains with zero-emission freight options."
+    }
   }
 ]
-

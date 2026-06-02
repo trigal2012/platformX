@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Loading Module...</title>
+  <title>EduGames Engine</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen p-4 flex flex-col justify-between">
 
-  <div class="max-w-md mx-auto w-full bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden flex flex-col">
+  <div class="max-w-md mx-auto w-full bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden flex flex-col mb-4">
     <div class="bg-indigo-600 text-white p-5">
       <a href="index.html" class="text-xs font-semibold text-indigo-200 hover:text-white">&larr; Back to Arcade</a>
       <h1 id="game-title" class="text-xl font-bold mt-2">Loading...</h1>
@@ -18,7 +18,7 @@
     <div class="p-5 flex-grow space-y-6">
       <p id="game-prompt" class="text-sm text-slate-600 leading-relaxed"></p>
 
-      <div id="sliders-container" class="space-y-4"></div>
+      <div id="interaction-zone" class="space-y-4"></div>
 
       <div id="tracker-box" class="hidden bg-slate-100 p-3 rounded-lg text-center text-sm font-bold"></div>
 
@@ -32,14 +32,25 @@
         <button onclick="window.location.reload()" class="text-xs font-semibold text-indigo-600 underline pt-2 block">Try Again</button>
       </div>
     </div>
+
+    <div class="bg-slate-50 px-5 py-2 border-t border-slate-100 text-[10px] text-slate-400 font-medium italic flex justify-between">
+      <span>Source Verification Module</span>
+      <span id="game-contribution">Anonymous Contributor</span>
+    </div>
+  </div>
+
+  <div id="sponsor-banner" class="max-w-md mx-auto w-full hidden bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+    <div class="text-[9px] font-bold text-amber-600 uppercase tracking-widest mb-1">Sponsored Learning Module</div>
+    <div id="sponsor-name" class="text-sm font-bold text-slate-800">Sponsor Name</div>
+    <div id="sponsor-message" class="text-xs text-slate-600 mt-1">Sponsor mission message context alignment.</div>
   </div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
     const gameId = params.get('id');
     let currentGame = null;
+    let selectedChoiceId = null; // Used tracking multiple choice interactions
 
-    // Load data asset
     fetch('games.json')
       .then(res => res.json())
       .then(games => {
@@ -53,29 +64,62 @@
       document.getElementById('game-title').innerText = currentGame.title;
       document.getElementById('game-concept').innerText = currentGame.concept;
       document.getElementById('game-prompt').innerText = currentGame.prompt;
+      
+      // Inject fact/data contributor credit
+      if (currentGame.contribution) {
+        document.getElementById('game-contribution').innerText = currentGame.contribution;
+      }
 
-      const container = document.getElementById('sliders-container');
-      currentGame.sliders.forEach(slider => {
-        const wrapper = document.createElement('div');
-        wrapper.className = "space-y-1";
-        wrapper.innerHTML = `
-          <div class="flex justify-between text-sm font-medium text-slate-700">
-            <span>${slider.name}</span>
-            <span id="val-${slider.id}" class="font-bold text-indigo-600">${slider.initial}</span>
-          </div>
-          <input type="range" id="input-${slider.id}" min="${slider.min}" max="${slider.max}" step="0.5" value="${slider.initial}" 
-            class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 game-slider">
-        `;
-        container.appendChild(wrapper);
+      // Render Sponsor details if active subscription models apply
+      if (currentGame.sponsor) {
+        document.getElementById('sponsor-banner').classList.remove('hidden');
+        document.getElementById('sponsor-name').innerText = currentGame.sponsor.name;
+        document.getElementById('sponsor-message').innerText = currentGame.sponsor.message;
+      }
 
-        const input = wrapper.querySelector('input');
-        input.addEventListener('input', (e) => {
-          document.getElementById(`val-${slider.id}`).innerText = e.target.value;
-          updateTrackers();
+      const zone = document.getElementById('interaction-zone');
+
+      // MECHANIC 1: Percentage Total Slider Systems
+      if (currentGame.mechanic === 'percentage_total') {
+        currentGame.sliders.forEach(slider => {
+          const wrapper = document.createElement('div');
+          wrapper.className = "space-y-1";
+          wrapper.innerHTML = `
+            <div class="flex justify-between text-sm font-medium text-slate-700">
+              <span>${slider.name}</span>
+              <span id="val-${slider.id}" class="font-bold text-indigo-600">${slider.initial}</span>
+            </div>
+            <input type="range" id="input-${slider.id}" min="${slider.min}" max="${slider.max}" step="0.5" value="${slider.initial}" 
+              class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 game-slider">
+          `;
+          zone.appendChild(wrapper);
+
+          const input = wrapper.querySelector('input');
+          input.addEventListener('input', (e) => {
+            document.getElementById(`val-${slider.id}`).innerText = e.target.value;
+            updateTrackers();
+          });
         });
-      });
+        updateTrackers();
+      } 
+      // MECHANIC 2: Interactive Multiple Choice Branch Nodes
+      else if (currentGame.mechanic === 'multiple_choice') {
+        currentGame.choices.forEach(choice => {
+          const btn = document.createElement('button');
+          btn.type = "button";
+          btn.className = "w-full text-left p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition text-sm font-medium focus:outline-none choice-option-btn";
+          btn.innerText = choice.text;
+          btn.addEventListener('click', () => {
+            // Reset colors on alternatives
+            document.querySelectorAll('.choice-option-btn').forEach(b => b.className = "w-full text-left p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition text-sm font-medium focus:outline-none choice-option-btn");
+            // Highlight current selection
+            btn.className = "w-full text-left p-3 rounded-xl border-2 border-indigo-600 bg-indigo-50/50 text-indigo-950 text-sm font-semibold focus:outline-none choice-option-btn";
+            selectedChoiceId = choice.id;
+          });
+          zone.appendChild(btn);
+        });
+      }
 
-      updateTrackers();
       document.getElementById('submit-btn').addEventListener('click', evaluateGame);
     }
 
@@ -94,30 +138,19 @@
       const resultBox = document.getElementById('result-box');
       const resultTitle = document.getElementById('result-title');
       const resultText = document.getElementById('result-text');
-      
-      let values = {};
-      currentGame.sliders.forEach(s => {
-        values[s.id] = parseFloat(document.getElementById(`input-${s.id}`).value);
-      });
-
       let passed = false;
 
-      // Evaluation Algorithms
       if (currentGame.mechanic === 'percentage_total') {
+        let values = {};
+        currentGame.sliders.forEach(s => values[s.id] = parseFloat(document.getElementById(`input-${s.id}`).value));
         let total = Object.values(values).reduce((a, b) => a + b, 0);
-        if (total !== 100) {
-          alert("Your allocation must equal exactly 100%!");
-          return;
-        }
-        // Success threshold rule
-        if (values.defense <= 45 && values.education >= 25 && values.social >= 25) {
-          passed = true;
-        }
-      } else if (currentGame.mechanic === 'target_range') {
-        // Yield criteria evaluation
-        if (values.rate >= 5.5 && values.rate <= 7.0) {
-          passed = true;
-        }
+        if (total !== 100) return alert("Your allocation must equal exactly 100%!");
+        if (values.defense <= 45 && values.education >= 25 && values.social >= 25) passed = true;
+      } 
+      else if (currentGame.mechanic === 'multiple_choice') {
+        if (!selectedChoiceId) return alert("Please select an answer choice before submitting verification!");
+        const choice = currentGame.choices.find(c => c.id === selectedChoiceId);
+        if (choice && choice.is_correct) passed = true;
       }
 
       document.getElementById('submit-btn').classList.add('hidden');
@@ -125,11 +158,11 @@
       
       if (passed) {
         resultBox.className = "p-4 rounded-xl border bg-emerald-50 border-emerald-200 text-emerald-900 space-y-2";
-        resultTitle.innerText = "🎉 Objective Achieved!";
+        resultTitle.innerText = "🎉 Verification Confirmed";
         resultText.innerText = currentGame.success_text;
       } else {
         resultBox.className = "p-4 rounded-xl border bg-rose-50 border-rose-200 text-rose-900 space-y-2";
-        resultTitle.innerText = "❌ Crisis Triggered";
+        resultTitle.innerText = "❌ Paradigm Collapse";
         resultText.innerText = currentGame.fail_text;
       }
     }
