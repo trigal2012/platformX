@@ -37,7 +37,7 @@
         games.forEach(game => {
           const card = document.createElement('a');
           // This appends the unique game id as a URL parameter
-          card.href = `game.html?id=${game.id}`;
+          card.href = search`./game.html?id=${game.id}`;
           card.className = "block bg-white p-5 rounded-xl shadow-sm border border-slate-200 hover:border-indigo-500 transition active:scale-[0.98]";
           card.innerHTML = `
             <div class="text-[10px] font-bold text-indigo-600 uppercase tracking-wider mb-1">${game.concept}</div>
