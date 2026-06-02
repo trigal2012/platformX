@@ -1,0 +1,83 @@
+[
+  {
+    "id": "game-1-sliders",
+    "title": "Clean Energy Grid Balance",
+    "concept": "Resource Allocation",
+    "desc": "Balance the electrical power grid using multiple energy inputs under strict target constraints.",
+    "contribution": "Data Source: California ISO 2026 Grid Metrics",
+    "screens": [
+      {
+        "type": "onboarding",
+        "heading": "Grid Operations Control",
+        "body": "Your task is simple but critical: configure our regional generation assets to supply exactly 100 Megawatts (MW) of continuous power while tracking carbon emission limits.",
+        "button_text": "Access Control Panel"
+      },
+      {
+        "type": "single_page_dashboard",
+        "prompt": "Adjust generation sources until total tracked output hits exactly 100 MW:",
+        "controls": [
+          {"id": "solar", "label": "Solar Array Arrays", "initial": 30, "min": 0, "max": 60},
+          {"id": "wind", "label": "Wind Turbine Farms", "initial": 20, "min": 0, "max": 50},
+          {"id": "gas", "label": "Natural Gas Baseline Reserve", "initial": 20, "min": 10, "max": 60}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "game-5-roi-college",
+    "title": "The Price of the Portal",
+    "concept": "Higher Ed ROI & Custom Calculator",
+    "desc": "Compare specific universities by entering actual costs to see the true timeline and impact of compounding student debt on your future budget.",
+    "contribution": "Data Engine: Federal Student Aid Bureau & Bureau of Labor Statistics",
+    "sponsor": {
+      "name": "Financial Literacy Foundation",
+      "message": "Empowering students to build sustainable wealth pathways."
+    },
+    "screens": [
+      {
+        "type": "onboarding",
+        "heading": "The $100,000 Financial Crossroads",
+        "body": "Before signing a loan document that impacts your next twenty years, let's run the actual math. You will pick a career path, input actual university costs, and witness the real age-30 net budget outcome.",
+        "button_text": "Start Custom Evaluation"
+      },
+      {
+        "type": "interaction_page",
+        "prompt": "Step 1: Choose your Academic Field of Study (Establishes your estimated future earning bracket and career joy):",
+        "options": [
+          {"id": "stem", "text": "STEM (Software/Engineering) | Base Joy: +15 | Avg Starting Pay: $78,000", "metric_shift": [78000, 15]},
+          {"id": "arts", "text": "Fine Arts / Humanities / Design | Base Joy: +60 | Avg Starting Pay: $42,000", "metric_shift": [42000, 60]},
+          {"id": "health", "text": "Nursing / Healthcare Ops | Base Joy: +35 | Avg Starting Pay: $70,000", "metric_shift": [70000, 35]},
+          {"id": "business", "text": "Business / Finance / Accounting | Base Joy: +10 | Avg Starting Pay: $65,000", "metric_shift": [65000, 10]}
+        ]
+      },
+      {
+        "type": "numeric_input_matrix",
+        "prompt": "Step 2: Input the actual numbers for the university track you want to evaluate. (Use yearly estimations based on your financial aid award letters or research):",
+        "inputs": [
+          {"id": "tuition", "label": "Annual Tuition Cost ($ per year)", "placeholder": "e.g., 28000"},
+          {"id": "living", "label": "Annual Housing & Living Overhead ($ per year)", "placeholder": "e.g., 14000"},
+          {"id": "grants", "label": "Annual Scholarships, Grants, or Family Help ($ per year)", "placeholder": "e.g., 5000"}
+        ]
+      },
+      {
+        "type": "slider_adjustment",
+        "prompt": "Step 3: Funding Strategy. Drag the slider to determine what percentage of your leftover funding gap will be covered by Student Loans versus working part-time:",
+        "slider": {
+          "id": "loan_share_percentage",
+          "label": "Percentage of Leftover Deficit Paid via Student Loans",
+          "initial": 80,
+          "min": 0,
+          "max": 100
+        }
+      },
+      {
+        "type": "ultimate_reveal",
+        "heading": "Your Age 30 Financial Reality Check",
+        "subscription_hook": {
+          "prompt": "Want a downloadable budget sheet comparing 50 different career paths?",
+          "button_text": "Get the Free Student Wealth Guide"
+        }
+      }
+    ]
+  }
+]
