@@ -1,40 +1,98 @@
 [
   {
-    "id": "economic-pie",
-    "title": "The Federal Budget Pie",
-    "concept": "Opportunity Cost",
-    "prompt": "You are the President. Allocate exactly 100% of the tax revenue. Balance baseline national security with public infrastructure investments.",
-    "mechanic": "percentage_total",
-    "sliders": [
-      {"id": "defense", "name": "Military & Defense", "initial": 40, "min": 0, "max": 100},
-      {"id": "education", "name": "Education & R&D", "initial": 20, "min": 0, "max": 100},
-      {"id": "social", "name": "Social Safety Nets", "initial": 40, "min": 0, "max": 100}
-    ],
-    "success_text": "Success! You maintained baseline security while investing heavily in future human capital. Long-term GDP projections look strong.",
-    "fail_text": "Failure. Your allocation triggered civic unrest due to social cuts, or underfunded research completely tanked innovation.",
-    "contribution": "Submitted by Prof. Aris (Stanford Econ)",
+    "id": "game-1-sliders",
+    "title": "Clean Energy Grid Balance",
+    "concept": "Resource Allocation",
+    "contribution": "Data Source: Department of Energy Grid Profiles",
     "sponsor": {
-      "name": "Acme Micro-Finance",
-      "message": "Empowering local economies through micro-lending solutions worldwide."
-    }
+      "name": "EcoVolt Networks",
+      "message": "Investing in localized microgrid infrastructure for a resilient future."
+    },
+    "screens": [
+      {
+        "step": 1,
+        "type": "single_page_dashboard",
+        "prompt": "The city needs exactly 100 Megawatts (MW) of power. Balance the sliders to meet demand while keeping carbon emissions below 20%. Each source has different traits.",
+        "mechanic": "target_sum",
+        "target_value": 100,
+        "controls": [
+          {"id": "solar", "label": "Solar Power (0% Emissions)", "initial": 20, "min": 0, "max": 60},
+          {"id": "wind", "label": "Wind Turbines (0% Emissions)", "initial": 20, "min": 0, "max": 50},
+          {"id": "gas", "label": "Natural Gas (50% Emissions)", "initial": 60, "min": 0, "max": 100}
+        ]
+      }
+    ]
   },
   {
-    "id": "tariff-war",
-    "title": "The Global Trade Dilemma",
-    "concept": "Tariffs & Protectionism",
-    "prompt": "Domestic manufacturing is declining, but implementing high broad tariffs will trigger retaliatory measures from trading partners. Choose the optimal policy action:",
-    "mechanic": "multiple_choice",
-    "choices": [
-      {"id": "a", "text": "Enact targeted subsidies for domestic R&D instead of aggressive border tariffs.", "is_correct": true},
-      {"id": "b", "text": "Impose a flat 25% tariff on all imported goods across the board.", "is_correct": false},
-      {"id": "c", "text": "Completely deregulate all environmental and labor standards to cut manufacturing costs.", "is_correct": false}
-    ],
-    "success_text": "Correct decision! Subsidies boosted domestic efficiency and preserved vital international trade agreements without triggering a consumer price spike.",
-    "fail_text": "Incorrect strategy. Aggressive broad tariffs triggered a devastating retaliatory trade war, doubling consumer electronics prices and hurting agriculture exports.",
-    "contribution": "Crowdsourced via EduCommunity Workspace",
+    "id": "game-2-reveal",
+    "title": "The Housing Supply Boom",
+    "concept": "Market Dynamics",
+    "contribution": "Submitted by Urban Planning Analytics Lab",
     "sponsor": {
-      "name": "Global Trade Logistics Corp",
-      "message": "Navigating modern supply chains with zero-emission freight options."
-    }
+      "name": "Metro Housing Alliance",
+      "message": "Building inclusive, walkable high-density communities."
+    },
+    "screens": [
+      {
+        "step": 1,
+        "type": "interaction_page",
+        "prompt": "Your city is facing skyrocketing rent prices. Choose a zoning policy strategy to deploy over the next decade:",
+        "mechanic": "multiple_choice",
+        "options": [
+          {"id": "deregulate", "text": "Abolish single-family zoning and allow high-density apartments near transit hubs.", "metric_shift": [15, 25, 45, 60, 80]},
+          {"id": "rent_control", "text": "Implement strict rent caps across all existing historical properties.", "metric_shift": [-5, -10, -5, 5, 10]},
+          {"id": "subsidize", "text": "Provide targeted tax credits exclusively for first-time home buyers.", "metric_shift": [5, 10, 15, 20, 25]}
+        ]
+      },
+      {
+        "step": 2,
+        "type": "visual_reveal_graph",
+        "heading": "10-Year Housing Production Timeline",
+        "body": "See how your choice changes total new unit construction over time compared to the baseline tracking data:"
+      }
+    ]
+  },
+  {
+    "id": "game-3-advanced",
+    "title": "The Carbon Footprint Challenge",
+    "concept": "Environmental Policy",
+    "contribution": "Climate Science Consortium Index",
+    "sponsor": {
+      "name": "TerraForm Ventures",
+      "message": "Accelerating carbon capture and green tech acceleration globally."
+    },
+    "screens": [
+      {
+        "step": 1,
+        "type": "onboarding",
+        "heading": "Global Climate Mandate",
+        "body": "You have been appointed to steer national sustainability targets. You will make a policy choice, balance investment capital, and analyze your performance matrix.",
+        "button_text": "Accept Mandate"
+      },
+      {
+        "step": 2,
+        "type": "interaction_page",
+        "prompt": "Phase 1: Select your primary industrial baseline transformation objective:",
+        "mechanic": "multiple_choice",
+        "options": [
+          {"id": "ev_mandate", "text": "Enforce a 100% electric vehicle sales target by 2035.", "multiplier": 1.5},
+          {"id": "carbon_tax", "text": "Levy a comprehensive $50/ton tax on commercial carbon emissions.", "multiplier": 2.0}
+        ]
+      },
+      {
+        "step": 3,
+        "type": "slider_adjustment",
+        "prompt": "Phase 2: Adjust your enforcement budget funding levels. Higher funding increases compliance rate but drains public reserve funds.",
+        "mechanic": "budget_slider",
+        "slider": {"id": "budget", "label": "Enforcement Capital ($ Billions)", "initial": 5, "min": 1, "max": 10}
+      },
+      {
+        "step": 4,
+        "type": "ultimate_reveal",
+        "heading": "Simulation Analysis Complete",
+        "learn_more_url": "https://www.ipcc.ch/",
+        "share_text": "I just balanced the Carbon Footprint Challenge module with an optimized efficiency metric! Test your skills here:"
+      }
+    ]
   }
 ]
