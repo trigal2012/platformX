@@ -1,0 +1,30 @@
+
+[
+  {
+    "id": "economic-pie",
+    "title": "The Federal Budget Pie",
+    "concept": "Opportunity Cost",
+    "prompt": "You are the President. Allocate exactly 100% of the tax revenue. Balance baseline national security with public infrastructure investments.",
+    "mechanic": "percentage_total",
+    "sliders": [
+      {"id": "defense", "name": "Military & Defense", "initial": 40, "min": 0, "max": 100},
+      {"id": "education", "name": "Education & R&D", "initial": 20, "min": 0, "max": 100},
+      {"id": "social", "name": "Social Safety Nets", "initial": 40, "min": 0, "max": 100}
+    ],
+    "success_text": "Success! You maintained baseline security while investing heavily in future human capital. Long-term GDP projections look strong.",
+    "fail_text": "Failure. Your allocation triggered civic unrest due to social cuts, or underfunded research completely tanked innovation."
+  },
+  {
+    "id": "interest-rates",
+    "title": "Cool Down Inflation",
+    "concept": "Monetary Policy",
+    "prompt": "Inflation is raging at 8.5%. Adjust the central bank's benchmark interest rate to bring inflation down to the 2% target without triggering a massive recession.",
+    "mechanic": "target_range",
+    "sliders": [
+      {"id": "rate", "name": "Federal Funds Rate (%)", "initial": 1.5, "min": 0, "max": 15}
+    ],
+    "success_text": "Perfect! Raising the interest rate to between 5.5% and 7.0% cooled down consumer borrowing just enough to tame inflation without massive layoffs.",
+    "fail_text": "Unsuccessful. Keeping rates too low allowed runaway hyperinflation to destroy savings. Moving them too high instantly triggered a severe economic depression."
+  }
+]
+

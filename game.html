@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loading Module...</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen p-4 flex flex-col justify-between">
+
+  <div class="max-w-md mx-auto w-full bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden flex flex-col">
+    <div class="bg-indigo-600 text-white p-5">
+      <a href="index.html" class="text-xs font-semibold text-indigo-200 hover:text-white">&larr; Back to Arcade</a>
+      <h1 id="game-title" class="text-xl font-bold mt-2">Loading...</h1>
+      <span id="game-concept" class="inline-block bg-indigo-700 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded mt-1">Concept</span>
+    </div>
+
+    <div class="p-5 flex-grow space-y-6">
+      <p id="game-prompt" class="text-sm text-slate-600 leading-relaxed"></p>
+
+      <div id="sliders-container" class="space-y-4"></div>
+
+      <div id="tracker-box" class="hidden bg-slate-100 p-3 rounded-lg text-center text-sm font-bold"></div>
+
+      <button id="submit-btn" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-md hover:bg-indigo-700 active:scale-[0.99] transition">
+        Submit Verification
+      </button>
+
+      <div id="result-box" class="hidden p-4 rounded-xl border space-y-2">
+        <h3 id="result-title" class="font-bold text-lg"></h3>
+        <p id="result-text" class="text-sm leading-relaxed"></p>
+        <button onclick="window.location.reload()" class="text-xs font-semibold text-indigo-600 underline pt-2 block">Try Again</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const gameId = params.get('id');
+    let currentGame = null;
+
+    // Load data asset
+    fetch('games.json')
+      .then(res => res.json())
+      .then(games => {
+        currentGame = games.find(g => g.id === gameId);
+        if (!currentGame) return alert("Game module not found.");
+        initGame();
+      });
+
+    function initGame() {
+      document.title = currentGame.title;
+      document.getElementById('game-title').innerText = currentGame.title;
+      document.getElementById('game-concept').innerText = currentGame.concept;
+      document.getElementById('game-prompt').innerText = currentGame.prompt;
+
+      const container = document.getElementById('sliders-container');
+      currentGame.sliders.forEach(slider => {
+        const wrapper = document.createElement('div');
+        wrapper.className = "space-y-1";
+        wrapper.innerHTML = `
+          <div class="flex justify-between text-sm font-medium text-slate-700">
+            <span>${slider.name}</span>
+            <span id="val-${slider.id}" class="font-bold text-indigo-600">${slider.initial}</span>
+          </div>
+          <input type="range" id="input-${slider.id}" min="${slider.min}" max="${slider.max}" step="0.5" value="${slider.initial}" 
+            class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 game-slider">
+        `;
+        container.appendChild(wrapper);
+
+        const input = wrapper.querySelector('input');
+        input.addEventListener('input', (e) => {
+          document.getElementById(`val-${slider.id}`).innerText = e.target.value;
+          updateTrackers();
+        });
+      });
+
+      updateTrackers();
+      document.getElementById('submit-btn').addEventListener('click', evaluateGame);
+    }
+
+    function updateTrackers() {
+      const trackerBox = document.getElementById('tracker-box');
+      if (currentGame.mechanic === 'percentage_total') {
+        trackerBox.classList.remove('hidden');
+        let total = 0;
+        document.querySelectorAll('.game-slider').forEach(s => total += parseFloat(s.value));
+        trackerBox.innerText = `Total Allocation: ${total}% (Must equal 100%)`;
+        trackerBox.className = total === 100 ? "bg-emerald-50 text-emerald-700 p-3 rounded-lg text-center text-sm font-bold border border-emerald-200" : "bg-amber-50 text-amber-700 p-3 rounded-lg text-center text-sm font-bold border border-amber-200";
+      }
+    }
+
+    function evaluateGame() {
+      const resultBox = document.getElementById('result-box');
+      const resultTitle = document.getElementById('result-title');
+      const resultText = document.getElementById('result-text');
+      
+      let values = {};
+      currentGame.sliders.forEach(s => {
+        values[s.id] = parseFloat(document.getElementById(`input-${s.id}`).value);
+      });
+
+      let passed = false;
+
+      // Evaluation Algorithms
+      if (currentGame.mechanic === 'percentage_total') {
+        let total = Object.values(values).reduce((a, b) => a + b, 0);
+        if (total !== 100) {
+          alert("Your allocation must equal exactly 100%!");
+          return;
+        }
+        // Success threshold rule
+        if (values.defense <= 45 && values.education >= 25 && values.social >= 25) {
+          passed = true;
+        }
+      } else if (currentGame.mechanic === 'target_range') {
+        // Yield criteria evaluation
+        if (values.rate >= 5.5 && values.rate <= 7.0) {
+          passed = true;
+        }
+      }
+
+      document.getElementById('submit-btn').classList.add('hidden');
+      resultBox.classList.remove('hidden');
+      
+      if (passed) {
+        resultBox.className = "p-4 rounded-xl border bg-emerald-50 border-emerald-200 text-emerald-900 space-y-2";
+        resultTitle.innerText = "🎉 Objective Achieved!";
+        resultText.innerText = currentGame.success_text;
+      } else {
+        resultBox.className = "p-4 rounded-xl border bg-rose-50 border-rose-200 text-rose-900 space-y-2";
+        resultTitle.innerText = "❌ Crisis Triggered";
+        resultText.innerText = currentGame.fail_text;
+      }
+    }
+  </script>
+</body>
+</html>
