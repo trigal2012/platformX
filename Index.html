@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <script>
+    window.onerror = function(message, source, lineno, colno, error) {
+      const errorMsg = `🛑 ARCADE HUB UNCAUGHT ERROR:\nMsg: ${message}\nLine: ${lineno}:${colno}\nFile: ${source ? source.split('/').pop() : 'inline script'}`;
+      alert(errorMsg);
+      return false;
+    };
+    window.addEventListener('unhandledrejection', function(event) {
+      alert(`⚠️ HUB PROMISE REJECTION:\n${event.reason}`);
+    });
+  </script>
+
+  <title>EduGames Arcade</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between">
+  
+  <header class="bg-indigo-600 text-white py-6 px-4 shadow-md text-center">
+    <h1 class="text-2xl font-bold tracking-tight">EduGames Arcade</h1>
+    <p class="text-xs text-indigo-200 mt-1">Unified Concept Simulation Hub</p>
+  </header>
+
+  <main class="max-w-md mx-auto w-full px-4 py-8 flex-grow">
+    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 mb-4">Select a Module:</h2>
+    
+    <div id="game-list" class="space-y-4">
+      <div id="hub-spinner" class="text-center text-slate-400 text-sm py-8 animate-pulse">
+        Streaming configuration architecture...
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-slate-950 py-4 text-center border-t border-slate-800">
+    <p class="text-[10px] text-slate-500 tracking-wide uppercase font-mono">Platform Orchestration Pipeline v1.2.0</p>
+  </footer>
+
+  <script>
+    const listContainer = document.getElementById('game-list');
+
+    console.log("Arcade hub initiating configuration stream fetch...");
+
+    // Read directly from your decoupled data file with cache-busting enabled
+    fetch('./games.json?v=' + Date.now())
+      .then(function(response) {
+        if (!response.ok) {
+          throw new Error("HTTP connection alert: Status " + response.status);
+        }
+        return response.json();
+      })
+      .then(function(gamesArray) {
+        console.log("Payload parsed successfully. Building menu interface...");
+        
+        // Clear out the "Streaming configuration..." placeholder text cleanly
+        if (listContainer) {
+          listContainer.innerHTML = '';
+          
+          // Loop through your JSON array automatically—no hardcoding required
+          gamesArray.forEach(function(game) {
+            const card = document.createElement('a');
+            card.href = "./game.html?id=" + game.id;
+            card.className = "block bg-slate-800 p-5 rounded-xl shadow-md border border-slate-700 hover:border-indigo-500 transition active:scale-[0.98]";
+            
+            // Generate layout markup programmatically based on your JSON schema attributes
+            card.innerHTML = [
+              '<div class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-1">' + (game.concept || 'Simulation') + '</div>',
+              '<h3 class="text-lg font-bold text-white">' + game.title + '</h3>',
+              '<p class="text-xs text-slate-400 mt-2 leading-relaxed">' + (game.desc || 'Interactive economic concept mapping module.') + '</p>',
+              '<div class="mt-4 text-xs font-bold text-indigo-400 flex items-center justify-end">LAUNCH MODULE &rarr;</div>'
+            ].join('');
+            
+            listContainer.appendChild(card);
+          });
+        }
+      })
+      .catch(function(error) {
+        console.error("Hub render cycle intercepted:", error);
+        if (listContainer) {
+          listContainer.innerHTML = [
+            '<div class="text-center p-4 bg-rose-950/40 border border-rose-800 rounded-xl text-rose-300">',
+              '<p class="font-bold text-sm">Arcade Core Sync Failure</p>',
+              '<p class="text-xs text-slate-400 font-mono mt-2 bg-slate-900 p-2 rounded break-all">' + error.message + '</p>',
+              '<p class="text-[10px] text-slate-500 mt-3 italic">Verify games.json exists at root and has no syntax errors.</p>',
+            '</div>'
+          ].join('');
+        }
+      });
+  </script>
+</body>
+</html>
