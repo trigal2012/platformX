@@ -44,14 +44,34 @@
     // Initialize application using routing query strings
     const gameId = new URLSearchParams(window.location.search).get('id') || 'game-1-sliders';
     
-    fetch('./games.json')
-      .then(res => res.json())
-      .then(data => {
-        activeGameConfig = data.find(g => g.id === gameId);
-        if (!activeGameConfig) return alert("Configuration module missing from data asset index.");
-        renderMetadataFrame();
-        renderActiveScreen();
-      });
+// The './' forces the browser to look inside the /platformX/ subdirectory
+fetch('./games.json?v=' + Date.now())
+  .then(response => {
+    // Defensive coding: Check if the server actually returned the file
+    if (!response.ok) {
+      throw new Error(`Network response was not ok: ${response.status}`);
+    }
+    return response.json();
+  })
+  .then(data => {
+    activeGameConfig = data.find(g => g.id === gameId);
+    if (!activeGameConfig) {
+      document.getElementById('nav-game-title').innerText = "Module Not Found";
+      return;
+    }
+    renderMetadataFrame();
+    renderActiveScreen();
+  })
+  .catch(error => {
+    console.error("Failed to load game configuration:", error);
+    // Display the error directly on the screen since we are testing on mobile
+    document.getElementById('game-stage').innerHTML = `
+      <div class="text-center text-rose-400 p-4 bg-rose-950/30 rounded-xl border border-rose-800">
+        <p class="font-bold">Data Load Error</p>
+        <p class="text-xs mt-1 text-slate-400">${error.message}</p>
+      </div>`;
+  });
+
 
     function renderMetadataFrame() {
       document.getElementById('nav-game-title').innerText = activeGameConfig.title;
