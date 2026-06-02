@@ -3,71 +3,226 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <script>
+    window.onerror = function(message, source, lineno, colno, error) {
+      const errorMsg = `🛑 UNCAUGHT SYNTAX ERROR:\nMsg: ${message}\nLine: ${lineno}:${colno}\nLoc: ${source ? source.split('/').pop() : 'inline script'}`;
+      alert(errorMsg);
+      return false;
+    };
+    window.addEventListener('unhandledrejection', function(event) {
+      alert(`⚠️ PROMISE REJECTION:\n${event.reason}`);
+    });
+  </script>
+
   <title>EduGames Orchestration Engine</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between p-4">
 
   <div class="max-w-md mx-auto w-full bg-slate-800 rounded-2xl shadow-xl border border-slate-700 overflow-hidden flex flex-col my-auto">
-    
     <div class="bg-indigo-600 p-4 flex justify-between items-center text-white shadow-sm">
-      <a href="index.html" class="text-xs font-semibold opacity-80 hover:opacity-100">&larr; Arcade</a>
-      <span id="nav-game-title" class="text-sm font-bold tracking-tight text-center truncate px-2">Loading Module...</span>
-      <span id="nav-step-tracker" class="bg-indigo-800 text-[10px] px-2 py-0.5 rounded font-mono font-bold whitespace-nowrap">Step 1/1</span>
+      <a href="./index.html" class="text-xs font-semibold opacity-80 hover:opacity-100">&larr; Arcade</a>
+      <span id="nav-game-title" class="text-sm font-bold tracking-tight text-center truncate px-2">Loading...</span>
+      <span id="nav-step-tracker" class="bg-indigo-800 text-[10px] px-2 py-0.5 rounded font-mono font-bold whitespace-nowrap">Page 1/1</span>
     </div>
 
     <div id="game-stage" class="p-6 flex-grow min-h-[380px] flex flex-col justify-center space-y-6">
-      </div>
+      <div id="fallback-status" class="text-center text-slate-400 text-sm animate-pulse">Initializing decoupled json stream...</div>
+    </div>
 
     <div class="bg-slate-850 px-5 py-3 border-t border-slate-750 text-[10px] text-slate-400 flex flex-col space-y-2">
       <div class="flex justify-between font-medium">
         <span id="footer-source">Data Source Verification</span>
         <span id="footer-sponsor-tag" class="text-amber-400 font-bold uppercase tracking-wider"></span>
       </div>
-      <div id="footer-sponsor-desc" class="text-[9px] text-slate-500 italic hidden border-t border-slate-700/50 pt-1.5"></div>
     </div>
   </div>
 
   <script>
+    // State Tracking
     let activeGameConfig = null;
     let currentScreenPointer = 0;
-    
-    // Dynamic tracking variables dictionary storage
-    let sessionState = {
-      selectedChoiceId: null,
-      choiceMetrics: [],
-      choiceMultiplier: 1,
-      sliderValues: {},
-      budgetAllocation: 5
-    };
+    let sessionState = { selectedChoiceId: null, choiceMetrics: [], choiceMultiplier: 1, sliderValues: {}, budgetAllocation: 5 };
 
-    // Initialize application using routing query strings
     const gameId = new URLSearchParams(window.location.search).get('id') || 'game-1-sliders';
-    
-console.log("Initializing payload acquisition...");
 
-fetch('./games.json?v=' + Date.now())
-  .then(res => {
-    console.log("Network response header received. Status:", res.status);
-    if (!res.ok) {
-      throw new Error(`Server returned HTTP Status ${res.status} when reading games.json`);
-    }
-    return res.text(); // Read raw text first to inspect structural anomalies
-  })
-  .then(rawText => {
-    try {
-      const data = JSON.parse(rawText);
-      console.log("JSON parsing execution clear:", data);
-      
-      activeGameConfig = data.find(g => g.id === gameId);
-      if (!activeGameConfig) {
-        throw new Error(`Data verified, but no matching configuration ID found for: "${gameId}"`);
+    // Asynchronous decoupled resource load pipeline
+    fetch('./games.json?v=' + Date.now())
+      .then(res => {
+        if (!res.ok) throw new Error("Network response error status: " + res.status);
+        return res.json();
+      })
+      .then(data => {
+        activeGameConfig = data.find(g => g.id === gameId);
+        if (!activeGameConfig) throw new Error("ID mismatch in configuration file");
+        renderMetadataFrame();
+        renderActiveScreen();
+      })
+      .catch(err => {
+        document.getElementById('game-stage').innerHTML = `
+          <div class="text-center p-4 bg-rose-950/40 border border-rose-800 rounded-xl text-rose-300">
+            <p class="font-bold text-sm">JSON Data Fetch Failure</p>
+            <p class="text-xs text-slate-400 font-mono mt-2 bg-slate-900 p-2 rounded break-all">${err.message}</p>
+          </div>`;
+      });
+
+    function renderMetadataFrame() {
+      document.getElementById('nav-game-title').innerText = activeGameConfig.title;
+      document.getElementById('footer-source').innerText = activeGameConfig.contribution || "Verified Educational Data";
+      if (activeGameConfig.sponsor) {
+        document.getElementById('footer-sponsor-tag').innerText = "Sponsor: " + activeGameConfig.sponsor.name;
       }
-      
-      renderMetadataFrame();
+    }
+
+    function renderActiveScreen() {
+      const stage = document.getElementById('game-stage');
+      const screen = activeGameConfig.screens[currentScreenPointer];
+      document.getElementById('nav-step-tracker').innerText = "Page " + (currentScreenPointer + 1) + "/" + activeGameConfig.screens.length;
+      stage.innerHTML = ''; 
+
+      if (screen.type === 'single_page_dashboard') {
+        stage.innerHTML = `
+          <div class="space-y-4">
+            <p class="text-xs text-slate-300 leading-relaxed">${screen.prompt}</p>
+            <div id="sliders-box" class="space-y-3"></div>
+            <div id="sum-tracker" class="p-3 rounded-xl text-center text-xs font-bold bg-slate-900 border border-slate-700"></div>
+            <button onclick="verifySumTargetGame()" class="w-full bg-indigo-600 hover:bg-indigo-500 py-3 rounded-xl font-bold transition">Submit Layout</button>
+          </div>`;
+        
+        const sBox = document.getElementById('sliders-box');
+        screen.controls.forEach(ctrl => {
+          if(!sessionState.sliderValues[ctrl.id]) sessionState.sliderValues[ctrl.id] = ctrl.initial;
+          const wrap = document.createElement('div');
+          wrap.className = "space-y-1 bg-slate-750 p-2.5 rounded-lg border border-slate-700";
+          wrap.innerHTML = `
+            <div class="flex justify-between text-xs font-semibold">
+              <span>${ctrl.label}</span>
+              <span id="lbl-${ctrl.id}" class="text-indigo-400 font-mono font-bold">${sessionState.sliderValues[ctrl.id]} MW</span>
+            </div>
+            <input type="range" min="${ctrl.min}" max="${ctrl.max}" value="${sessionState.sliderValues[ctrl.id]}" class="w-full h-1.5 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-indigo-500 single-game-slider" data-id="${ctrl.id}">`;
+          
+          wrap.querySelector('input').addEventListener('input', function(e) {
+            sessionState.sliderValues[ctrl.id] = parseInt(e.target.value);
+            document.getElementById('lbl-' + ctrl.id).innerText = e.target.value + " MW";
+            evaluateLiveSumTracker();
+          });
+          sBox.appendChild(wrap);
+        });
+        evaluateLiveSumTracker();
+      } 
+      else if (screen.type === 'interaction_page') {
+        stage.innerHTML = `
+          <div class="space-y-4">
+            <p class="text-sm text-slate-300 leading-relaxed">${screen.prompt}</p>
+            <div id="options-box" class="space-y-2.5"></div>
+            <button onclick="verifyChoiceSubmission()" class="w-full bg-indigo-600 hover:bg-indigo-500 py-3 rounded-xl font-bold transition">Lock Strategy &rarr;</button>
+          </div>`;
+        
+        const oBox = document.getElementById('options-box');
+        screen.options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = "w-full text-left p-3 rounded-xl border text-xs font-medium transition " + (sessionState.selectedChoiceId === opt.id ? "border-2 border-indigo-500 bg-indigo-950/40 text-indigo-200" : "border-slate-700 bg-slate-750 hover:bg-slate-700 text-slate-300");
+          btn.innerText = opt.text;
+          btn.addEventListener('click', function() {
+            sessionState.selectedChoiceId = opt.id;
+            sessionState.choiceMetrics = opt.metric_shift || [];
+            sessionState.choiceMultiplier = opt.multiplier || 1;
+            renderActiveScreen();
+          });
+          oBox.appendChild(btn);
+        });
+      } 
+      else if (screen.type === 'visual_reveal_graph') {
+        stage.innerHTML = `
+          <div class="space-y-4 text-center">
+            <h3 class="text-lg font-bold text-white">${screen.heading}</h3>
+            <p class="text-xs text-slate-350">${screen.body}</p>
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 space-y-3">
+              <div id="bar-graph-container" class="flex justify-around items-end h-28 pt-2"></div>
+              <div class="flex justify-around text-[9px] text-slate-400 uppercase font-mono tracking-wider font-bold"><span>Yr 2</span><span>Yr 4</span><span>Yr 6</span><span>Yr 8</span><span>Yr 10</span></div>
+            </div>
+            <button onclick="resetEngineModuleLoop()" class="w-full bg-slate-700 hover:bg-slate-600 py-2.5 rounded-xl font-bold text-xs transition">Reset Simulation</button>
+          </div>`;
+        
+        const gContainer = document.getElementById('bar-graph-container');
+        const points = sessionState.choiceMetrics.length ? sessionState.choiceMetrics : [10, 20, 30, 40, 50];
+        points.forEach(val => {
+          const barWrapper = document.createElement('div');
+          barWrapper.className = "w-6 bg-slate-750 rounded-t relative flex flex-col justify-end items-center";
+          barWrapper.style.height = Math.max(5, Math.min(100, val)) + "%";
+          barWrapper.innerHTML = '<div class="w-full bg-indigo-500 rounded-t" style="height:100%"></div><span class="absolute -top-5 text-[9px] font-mono font-bold text-indigo-400">' + val + '%</span>';
+          gContainer.appendChild(barWrapper);
+        });
+      } 
+      else if (screen.type === 'slider_adjustment') {
+        stage.innerHTML = `
+          <div class="space-y-4">
+            <p class="text-sm text-slate-300 leading-relaxed">${screen.prompt}</p>
+            <div class="bg-slate-750 p-4 rounded-xl border border-slate-700 space-y-2">
+              <div class="flex justify-between text-xs font-bold"><span>${screen.slider.label}</span><span id="budget-lbl" class="text-amber-400 font-mono">${sessionState.budgetAllocation}B</span></div>
+              <input type="range" min="${screen.slider.min}" max="${screen.slider.max}" value="${sessionState.budgetAllocation}" class="w-full h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-amber-500" id="raw-budget-slider">
+            </div>
+            <button onclick="advanceScreenNext()" class="w-full bg-indigo-600 hover:bg-indigo-500 py-3 rounded-xl font-bold transition">Process Metrics &rarr;</button>
+          </div>`;
+        
+        document.getElementById('raw-budget-slider').addEventListener('input', function(e) {
+          sessionState.budgetAllocation = parseInt(e.target.value);
+          document.getElementById('budget-lbl').innerText = e.target.value + "B";
+        });
+      } 
+      else if (screen.type === 'ultimate_reveal') {
+        const score = Math.round((sessionState.budgetAllocation * sessionState.choiceMultiplier) * 12.5);
+        stage.innerHTML = `
+          <div class="text-center space-y-4">
+            <h2 class="text-xl font-black text-emerald-400">${screen.heading}</h2>
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-700">
+              <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Calculated Efficiency Index</div>
+              <div class="text-4xl font-black text-indigo-400 font-mono my-1">${score}%</div>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="resetEngineModuleLoop()" class="w-full bg-slate-700 hover:bg-slate-600 py-2.5 rounded-xl text-xs font-bold transition">Restart Simulation</button>
+            </div>
+          </div>`;
+      }
+    }
+
+    function evaluateLiveSumTracker() {
+      const display = document.getElementById('sum-tracker');
+      let total = 0;
+      document.querySelectorAll('.single-game-slider').forEach(input => total += parseInt(input.value));
+      display.innerText = "Total Output: " + total + " MW / 100 MW";
+      display.className = total === 100 ? "p-3 rounded-xl text-center text-xs font-bold bg-emerald-950/40 border border-emerald-700 text-emerald-300" : "p-3 rounded-xl text-center text-xs font-bold bg-amber-950/40 border border-amber-700 text-amber-300";
+    }
+
+    function verifySumTargetGame() {
+      let total = 0;
+      document.querySelectorAll('.single-game-slider').forEach(input => total += parseInt(input.value));
+      if (total !== 100) return alert("Configuration must equal exactly 100 MW. Currently at " + total + " MW.");
+      alert("🎉 Configuration verified!");
+      resetEngineModuleLoop();
+    }
+
+    function verifyChoiceSubmission() {
+      if (!sessionState.selectedChoiceId) return alert("Make a selection!");
+      advanceScreenNext();
+    }
+
+    function advanceScreenNext() {
+      if (currentScreenPointer < activeGameConfig.screens.length - 1) {
+        currentScreenPointer++;
+        renderActiveScreen();
+      }
+    }
+
+    function resetEngineModuleLoop() {
+      sessionState = { selectedChoiceId: null, choiceMetrics: [], choiceMultiplier: 1, sliderValues: {}, budgetAllocation: 5 };
+      currentScreenPointer = 0;
       renderActiveScreen();
-    } catch (jsonError) {
-      // Catch syntax errors specifically inside games.json
+    }
+  </script>
+</body>
+</html>
       throw new Error(`Malformed JSON structure inside games.json. Details: ${jsonError.message}\n\nRaw Text Preview: ${rawText.substring(0, 100)}`);
     }
   })
